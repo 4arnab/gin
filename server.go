@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	server := gin.Default()
+	router := gin.Default()
 
-	server.GET("/", func(context *gin.Context) {
+	router.GET("/", func(context *gin.Context) {
 		context.JSON(200, gin.H{
 			"message": "this is my server",
 		})
@@ -24,7 +26,7 @@ func main() {
 		Name: "Ahmed Arnab",
 		Age:  19,
 	}
-	server.POST("/products/", func(context *gin.Context) {
+	router.POST("/products/", func(context *gin.Context) {
 		page := context.Query("page")
 		size := context.Query("size")
 
@@ -40,5 +42,15 @@ func main() {
 	})
 
 	fmt.Println("server listening on port 4000")
-	server.Run(":4000")
+	// server.Run(":4000")
+
+	// custom configuration
+	server := &http.Server{
+		Addr:         ":4000", // the port to listen
+		Handler:      router,  // the routes
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	server.ListenAndServe()
 }
