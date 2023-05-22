@@ -18,10 +18,17 @@ func main() {
 
 	router.GET("/products", Products)
 
+	auth := gin.BasicAuth(gin.Accounts{
+		"user": "pass",
+	})
+
 	// route grouping
-	users := router.Group("/users")
+	users := router.Group("/users", auth)
 	{
 		users.GET("productsTwo", Products)
+		users.POST("/new", func(context *gin.Context) {
+			// this context parameter contains all the request and response information or functions and meta data
+		})
 	}
 
 	// custom configuration
