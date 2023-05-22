@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/4arnab/gin/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,18 +17,25 @@ type USER struct {
 func main() {
 	router := gin.Default()
 
-	router.GET("/products", Products)
+	// using middleware in the app level
+	// router.Use(middleware.Authenticate)
 
-	auth := gin.BasicAuth(gin.Accounts{
-		"user": "pass",
-	})
+	router.GET("/products", middleware.Authenticate, middleware.AddHeaders, Products) // adding a middleware function in to a single route also chaining middleware functions
+
+	// auth := gin.BasicAuth(gin.Accounts{
+	// 	"user": "pass",
+	// })
 
 	// route grouping
-	users := router.Group("/users", auth)
+	users := router.Group("/users")
 	{
 		users.GET("productsTwo", Products)
 		users.POST("/new", func(context *gin.Context) {
 			// this context parameter contains all the request and response information or functions and meta data
+			var user USER
+			context.BindJSON(&user)
+
+			context.JSON(200, user)
 		})
 	}
 
@@ -45,6 +53,7 @@ func main() {
 
 }
 func Products(context *gin.Context) {
+	fmt.Println(context.Request.Header.Get("key"), "THIS IS THE HEADERS 💡")
 	page := context.Query("page")
 	size := context.Query("size")
 
