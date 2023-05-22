@@ -8,41 +8,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type USER struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
 func main() {
 	router := gin.Default()
 
-	router.GET("/", func(context *gin.Context) {
-		context.JSON(200, gin.H{
-			"message": "this is my server",
-		})
-	})
+	router.GET("/products", Products)
 
-	type USER struct {
-		Name string `json:"name"`
-		Age  int    `json:"age"`
+	// route grouping
+	users := router.Group("/users")
+	{
+		users.GET("productsTwo", Products)
 	}
-
-	newUser := USER{
-		Name: "Ahmed Arnab",
-		Age:  19,
-	}
-	router.POST("/products/", func(context *gin.Context) {
-		page := context.Query("page")
-		size := context.Query("size")
-
-		// formData := context.PostForm()
-		// jsonData, _ := ioutil.ReadAll(context.Request.Body)
-
-		var user USER
-		context.BindJSON(&user)
-
-		fmt.Print(user)
-		// context.JSON(200, map[string]string{"page": page, "size": size})
-		context.JSON(200, gin.H{"user": newUser, "page": page, "size": size, "bodyData": user})
-	})
-
-	fmt.Println("server listening on port 4000")
-	// server.Run(":4000")
 
 	// custom configuration
 	server := &http.Server{
@@ -52,5 +32,22 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	fmt.Println("server listening on port 4000")
 	server.ListenAndServe()
+	// server.Run(":4000")
+
+}
+func Products(context *gin.Context) {
+	page := context.Query("page")
+	size := context.Query("size")
+
+	// formData := context.PostForm()
+	// jsonData, _ := ioutil.ReadAll(context.Request.Body)
+
+	var user USER
+	context.BindJSON(&user)
+
+	fmt.Print(user)
+	// context.JSON(200, map[string]string{"page": page, "size": size})
+	context.JSON(200, gin.H{"page": page, "size": size, "bodyData": user})
 }
